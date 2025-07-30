@@ -1,0 +1,22 @@
+# Pasta de build
+/build/
+/bin/
+
+# Arquivos de configuração
+/.venv/
+/.vscode/
+*.swp
+*~
+
+# Arquivos de sistema operacional
+.DS_Store
+Thumbs.db
+
+# Executáveis e bibliotecas compiladas
+*.exe
+*.out
+*.a
+*.so
+*.dll
+
+CMakeLists.txt
