@@ -18,5 +18,3 @@ Thumbs.db
 *.a
 *.so
 *.dll
-
-CMakeLists.txt
