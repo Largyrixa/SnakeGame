@@ -14,8 +14,8 @@ using namespace std;
 
 string save_path = "data/melhor_cerebro.txt";
 
-const int largura_tab = 30;
-const int altura_tab  = 30;
+const int largura_tab = 10;
+const int altura_tab  = 10;
 
 int max_y, max_x;
 
@@ -23,11 +23,14 @@ void printTab();
 void fillTab();
 void printCobra (const Cobra&);
 void printComida (const comida_t&);
+void mostrar_bot (BotGenetico bot);
 
 int main(int argc, char** argv) 
 {
     initscr();
     noecho();
+    cbreak();
+    nodelay(stdscr, TRUE);
     start_color();
     curs_set(0);
 
@@ -58,87 +61,13 @@ int main(int argc, char** argv)
     refresh();
 
     int high_score = 0;
-    auto bot = BotGenetico(altura_tab, largura_tab);
-
-    if (!bot.cerebro.carregar_rede(save_path))
-    {
-        endwin();
-        return 1;
-    }
-
+    
     while (getch() != 'q')
     {
-        auto bot_atual = bot;
-        clear();
-        printTab();
-
-        printCobra(bot_atual.jogo.get_cobra());
-        printComida(bot_atual.jogo.get_comida());
-
-        int score = 0;
-
-        int passos = 0;
-        int max_passos = altura_tab*largura_tab;
-
-        mvprintw(altura_tab + 2, 1, "SCORE: %d  PASSOS: %d", score, passos);
-        refresh();
-
-        while (!bot_atual.jogo.isWin() && !bot_atual.jogo.isGameOver())
-        {
-            auto jogada = bot_atual.calcular_jogada();
-            bot_atual.jogo.input(jogada);
-            bot_atual.jogo.tick();
-            passos ++;
-
-            fillTab();
-            printCobra(bot.jogo.get_cobra());
-            printComida(bot.jogo.get_comida());
-
-
-            mvprintw(altura_tab + 2, 1, "SCORE: %d  EFICIENCIA: %.2lf %", score, (1.0/(passos + 1.0) * 100.0));
-
-            if (bot.jogo.get_score() != score)
-            {
-                passos = 0;
-                score = bot.jogo.get_score();
-            }
-
-            if (passos >= max_passos)
-            {
-                break;
-            }
-
-            refresh();
-            usleep(40000);
-        }
-
-        if (bot.jogo.isWin())
-        {
-            char msg[] = " GANHOU! ";
-            attron (A_BLINK | A_BOLD | COLOR_PAIR(4));
-
-            mvprintw((altura_tab - 1) / 2,  ((largura_tab + 1)*2 - strlen(msg)) / 2, msg);
-
-            refresh();
-            attroff(A_BLINK | A_BOLD | COLOR_PAIR(4));
-
-            usleep(5000000);
-        } 
-        
-        else 
-        {
-            char msg[] = " PERDEU! ";
-            attron (A_BLINK | A_BOLD | COLOR_PAIR(3));
-            mvprintw((altura_tab - 1) / 2, ((largura_tab + 1)*2 - strlen(msg)) / 2, msg);
-            refresh();
-
-            attroff (A_BLINK | A_BOLD | COLOR_PAIR(3));
-        }
-
-        clear();
-        char msg[] = "pressione enter para começar ou 'q' para sair";
-        mvprintw(max_y / 2, (max_x - strlen(msg)) / 2, msg);
-        refresh();
+        auto bot = BotGenetico(altura_tab, largura_tab);
+        bot.cerebro.carregar_rede(save_path);
+        mostrar_bot(bot);
+        usleep(1000000);
     }
 
     endwin();
@@ -193,4 +122,66 @@ void printComida (const comida_t& comida) {
 
     attroff(COLOR_PAIR(2));
     attroff(A_BOLD);
+}
+
+void mostrar_bot (BotGenetico bot) {
+    clear();
+    printTab();
+
+    printCobra(bot.jogo.get_cobra());
+    printComida(bot.jogo.get_comida());
+
+    int score = 0;
+
+    int passos = 0;
+    int max_passos = altura_tab*largura_tab;
+
+    mvprintw(altura_tab + 3, 1, "SCORE: %d", 0);
+    refresh();
+    
+    while (!bot.jogo.isWin() && !bot.jogo.isGameOver()) 
+    {
+        auto jogada = bot.calcular_jogada();
+        bot.jogo.input(jogada);
+        bot.jogo.tick();
+        passos++;
+
+        fillTab();
+        printCobra(bot.jogo.get_cobra());
+        printComida(bot.jogo.get_comida());
+        
+        mvprintw(altura_tab + 3, 1, "SCORE: %d", bot.jogo.get_score());
+        if (bot.jogo.get_score() != score) {
+            passos = 0;
+            score = bot.jogo.get_score();
+        }
+
+        if (passos >= max_passos) {
+            break;
+        }
+
+        refresh();
+        usleep(20000);
+    }
+
+    if (bot.jogo.isWin()) {
+        char msg[] = " GANHOU! ";
+        attron (A_BLINK | A_BOLD | COLOR_PAIR(4));
+
+        mvprintw((altura_tab - 1) / 2,  ((largura_tab + 1)*2 - strlen(msg)) / 2, msg);
+
+        refresh();
+        attroff(A_BLINK | A_BOLD | COLOR_PAIR(4));
+
+        usleep(1000000);
+    } else {
+        char msg[] = " PERDEU! ";
+        attron (A_BLINK | A_BOLD | COLOR_PAIR(3));
+
+        mvprintw((altura_tab - 1) / 2, ((largura_tab + 1)*2 - strlen(msg)) / 2, msg);
+
+        refresh();
+
+        attroff(A_BLINK | A_BOLD | COLOR_PAIR(3));
+    }
 }
