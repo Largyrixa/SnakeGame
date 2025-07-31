@@ -71,7 +71,7 @@ Certifique-se de ter um compilador C++, o CMake e a biblioteca [ncurses](https:/
 
 ```bash
 # Clone o repositorio
-git clone https://github.com/Largyrixa/SnakeAI.git
+git clone https://github.com/Largyrixa/SnakeGame.git
 cd SnakeAI
 
 # Crie a pasta de build e compile
